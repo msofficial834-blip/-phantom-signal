@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#050508">
+<title>PHANTOM SIGNAL</title>
+<style>
+:root{--bg:#050508;--panel:#0c0b12;--line:#33203e;--purple:#c68cff;--green:#72ffb0;--red:#ff4669;--muted:#a18dab}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at 50% 0%,#21102b 0%,var(--bg) 48%);color:#f0e7fa;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;min-height:100vh}
+canvas{position:fixed;inset:0;width:100%;height:100%;opacity:.15;pointer-events:none}
+main{position:relative;max-width:760px;margin:auto;padding:18px 13px 28px}
+header,.panel{border:1px solid var(--line);background:rgba(10,8,15,.94);border-radius:12px;box-shadow:0 0 28px #bd6aff0c}
+header{padding:17px}
+.kicker{color:var(--purple);font-size:10px;letter-spacing:3px}
+h1{font-size:clamp(25px,7vw,42px);letter-spacing:3px;margin:9px 0;text-shadow:0 0 22px #b95aff66}
+.sub{font-size:11px;line-height:1.7;color:var(--muted)}
+.status{display:flex;justify-content:space-between;gap:8px;margin-top:14px;flex-wrap:wrap}
+.badge{border:1px solid #4d2e60;border-radius:99px;padding:6px 9px;font-size:9px;color:var(--purple)}
+.panel{padding:15px;margin-top:12px}
+h2{font-size:13px;letter-spacing:2px;color:var(--purple);margin:0 0 12px}
+label{display:block;color:#c7b2d5;font-size:11px;margin:12px 0 7px}
+input,textarea{width:100%;border:1px solid #4b315b;border-radius:7px;background:#08070c;color:#f5e9ff;padding:13px;font:inherit;font-size:13px;outline:none}
+input:focus,textarea:focus{border-color:var(--purple);box-shadow:0 0 0 2px #c68cff18}
+button,.linkbtn{display:inline-flex;justify-content:center;align-items:center;gap:8px;border:1px solid #78449a;background:#21102d;color:#f1dcff;border-radius:7px;padding:12px 14px;font:inherit;font-size:11px;font-weight:800;letter-spacing:1px;text-decoration:none;cursor:pointer}
+.primary{background:linear-gradient(100deg,#46215c,#281238);width:100%;margin-top:13px;padding:14px}
+.secondary{background:#101016;border-color:#393040}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.note{font-size:10px;color:var(--muted);line-height:1.7;margin-top:10px}
+#inviteOutput{min-height:72px;resize:vertical;line-height:1.6}
+#toast{color:var(--green);font-size:11px;min-height:16px;margin-top:8px}
+.footer{text-align:center;font-size:9px;color:#70577f;letter-spacing:2px;margin:18px 0}
+body.experience{overflow:hidden;background:#030307}
+#experience{position:fixed;inset:0;z-index:5;display:none;overflow:auto;background:radial-gradient(circle at 50% 40%,#34103e,#08050c 55%,#020204);text-align:center;padding:24px 18px;align-items:center;justify-content:center;flex-direction:column}
+#experience.show{display:flex;animation:appear .8s ease both}
+@keyframes appear{from{opacity:0;filter:blur(12px);transform:scale(1.04)}to{opacity:1;filter:blur(0);transform:scale(1)}}
+.glitch{font-size:clamp(29px,10vw,64px);font-weight:900;letter-spacing:5px;color:#f0d8ff;text-shadow:3px 0 var(--red),-3px 0 #6dffce;animation:flicker 2.5s infinite}
+@keyframes flicker{0%,94%,100%{opacity:1}95%{opacity:.3}97%{opacity:.8}98%{opacity:.2}}
+.exptext{max-width:500px;color:#d0b8df;line-height:1.8;font-size:12px;margin:15px auto}
+.expbox{border:1px solid #663778;background:#0b0710c9;padding:16px;border-radius:10px;width:min(100%,500px);margin:12px 0;box-shadow:0 0 35px #bb55ff16}
+#secretInput{margin:10px 0}
+#expMsg{min-height:20px;color:var(--green);font-size:11px}
+@media(min-width:600px){main{padding-top:30px}.panel{padding:20px}}
+</style>
+</head>
+<body>
+<canvas id="rain"></canvas>
+<main id="builder">
+<header>
+  <div class="kicker">DARK-CODE UNIVERSE // NODE 009</div>
+  <h1>PHANTOM SIGNAL</h1>
+  <div class="sub">A mysterious invitation generator. Create a link to a fictional dark experience and share it with someone who wants to try it.</div>
+  <div class="status"><span class="badge">● LOCAL GENERATOR</span><span class="badge">NO DEVICE ACCESS</span><span class="badge">BUILD 01</span></div>
+</header>
+<section class="panel">
+  <h2>01 / CREATE INVITATION</h2>
+  <label for="phone">Recipient mobile number (optional)</label>
+  <input id="phone" type="tel" inputmode="tel" placeholder="+91 98XXXXXXXX" autocomplete="tel">
+  <div class="note">The number is used only to prepare an SMS draft. This page does not send or store it. The recipient chooses whether to open the invitation.</div>
+  <label for="message">Invitation message</label>
+  <textarea id="message" rows="3">A signal has been detected. Open this link if you want to enter the PHANTOM SIGNAL experience.</textarea>
+  <button class="primary" id="generate">GENERATE INVITATION ↗</button>
+  <label for="inviteOutput">Shareable link</label>
+  <textarea id="inviteOutput" rows="2" readonly placeholder="Your link will appear here after this page is published online."></textarea>
+  <div class="row">
+    <button class="secondary" id="copy">COPY LINK</button>
+    <button class="secondary" id="sms">OPEN SMS DRAFT</button>
+    <button class="secondary" id="test">PREVIEW EXPERIENCE</button>
+  </div>
+  <div id="toast" role="status"></div>
+  <div class="note"><strong>Important:</strong> When testing from a local Acode file, the generated link works only on this same device/file location. To share a working link with another phone, publish this folder to a static host such as GitHub Pages first, then use the published URL.</div>
+</section>
+<section class="panel">
+  <h2>02 / HOW IT WORKS</h2>
+  <div class="sub">1. Publish this page online.<br>2. Generate and copy its URL.<br>3. Open the SMS draft and tap Send yourself.<br>4. The recipient taps the link to start the animation. No hidden access, remote control, or automatic device changes.</div>
+</section>
+<div class="footer">PHANTOM SIGNAL // FICTIONAL EXPERIENCE ONLY</div>
+</main>
+<section id="experience" aria-label="Phantom Signal experience">
+  <div class="kicker">INCOMING TRANSMISSION // 001</div>
+  <div class="glitch">SIGNAL FOUND</div>
+  <div class="exptext">You crossed the threshold.<br>A mysterious signal has reached this screen.<br><span style="color:#ff7d9a">No device access has occurred.</span></div>
+  <div class="expbox">
+    <div class="kicker">THE FIRST SEAL</div>
+    <p class="exptext">The key is the opposite of light.</p>
+    <input id="secretInput" placeholder="Enter the secret phrase" autocomplete="off">
+    <button id="unlock">UNLOCK SEAL</button>
+    <div id="expMsg"></div>
+  </div>
+  <button class="secondary" id="exit">EXIT EXPERIENCE</button>
+</section>
+<script>
+(() => {
+ const $=id=>document.getElementById(id);
+ const params=new URLSearchParams(location.search);
+ const isExperience=params.get('mode')==='experience';
+ function showExperience(){
+   $('experience').classList.add('show'); document.body.classList.add('experience'); $('builder').style.display='none';
+ }
+ if(isExperience) showExperience();
+ $('generate').addEventListener('click',()=>{
+   const number=$('phone').value.trim();
+   const base=location.href.split('?')[0].split('#')[0];
+   const isLocal=location.protocol==='file:';
+   const url=isLocal?'':base+'?mode=experience';
+   $('inviteOutput').value=url;
+   $('toast').textContent=isLocal?'Preview ready. Publish this page online to create a link that works on another phone.':'Invitation link generated. Copy it or open an SMS draft.';
+   if(number && !/^[+\d()\-\s]{7,20}$/.test(number)) $('toast').textContent='Check the phone number format. The link can still be shared manually.';
+ });
+ $('copy').addEventListener('click',async()=>{
+   const val=$('inviteOutput').value;
+   if(!val){$('toast').textContent='Generate an invitation first.';return;}
+   try{await navigator.clipboard.writeText(val);$('toast').textContent='Link copied.';}
+   catch(e){$('inviteOutput').focus();$('inviteOutput').select();$('toast').textContent='Select and copy the link manually.';}
+ });
+ $('sms').addEventListener('click',()=>{
+   const number=$('phone').value.trim();
+   const link=$('inviteOutput').value;
+   if(!link){$('toast').textContent='Generate an invitation first. Publish online for a shareable link.';return;}
+   const body=encodeURIComponent($('message').value+'\n'+link);
+   location.href='sms:'+number+'?body='+body;
+ });
+ $('test').addEventListener('click',showExperience);
+ $('exit').addEventListener('click',()=>{location.href=location.pathname;});
+ $('unlock').addEventListener('click',()=>{
+   const v=$('secretInput').value.trim().toLowerCase();
+   $('expMsg').textContent=['dark','darkness','the dark'].includes(v)?'SEAL 01 UNLOCKED // SIGNAL FRAGMENT RECOVERED':'ACCESS DENIED // HINT: absence of light';
+ });
+ $('secretInput').addEventListener('keydown',e=>{if(e.key==='Enter')$('unlock').click();});
+ const c=$('rain'),ctx=c.getContext('2d');let w,h,drops=[],font=15;
+ function resize(){const dpr=Math.min(devicePixelRatio||1,2);w=innerWidth;h=innerHeight;c.width=w*dpr;c.height=h*dpr;c.style.width=w+'px';c.style.height=h+'px';ctx.setTransform(dpr,0,0,dpr,0,0);drops=Array(Math.ceil(w/font)).fill(1)}
+ function draw(){ctx.fillStyle='rgba(5,5,8,.13)';ctx.fillRect(0,0,w,h);ctx.fillStyle='#c68cff';ctx.font=font+'px monospace';for(let i=0;i<drops.length;i++){ctx.fillText(String.fromCharCode(0x30A0+Math.random()*96),i*font,drops[i]*font);if(drops[i]*font>h&&Math.random()>.975)drops[i]=0;drops[i]++}requestAnimationFrame(draw)}
+ addEventListener('resize',resize);resize();draw();
+})();
+</script>
+</body>
+</html>
